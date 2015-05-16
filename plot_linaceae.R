@@ -5,6 +5,7 @@ library(ape)
 library(phytools)
 library(OutbreakTools)
 library(strap)
+library(plotrix)
 
 # read in tree
 nexus = "MAP_ages_fixed.tree"
@@ -14,7 +15,7 @@ tree = read.annotated.nexus(nexus)
 pdf(paste0(nexus, ".pdf"), height=10.0, width=8.5)
 
 # ladderize the tree
-#tree = ladderize(tree, right=FALSE)
+tree = ladderize(tree, right=FALSE)
 
 # get root height
 tree$root.time = max(nodeHeights(tree))
@@ -26,7 +27,8 @@ posteriors = vector()
 for (i in 1:length(tree$annotations)) {
 
     if (!is.null(tree$annotations[[i]]$posterior)) 
-        posteriors[i] = tree$annotations[[i]]$posterior
+        #posteriors[i] = tree$annotations[[i]]$posterior
+        posteriors = append(posteriors, tree$annotations[[i]]$posterior)
 }
 
 hpd_min = vector()
@@ -59,11 +61,35 @@ for(i in 1:length(tree$annotations)){
 
 
 # plot the tree with geological scale
-geoscalePhylo(tree, units=c("Period", "Epoch"), boxes="Epoch", cex.tip=0.5, cex.age=0.5, cex.ts=0.5, label.offset=0.5, x.lim=c(-40,tree$root.time)+7, width=1, quat.rm=TRUE)
+geoscalePhylo(tree, units=c("Period", "Epoch"), boxes="Epoch", cex.tip=0.5, cex.age=0.7, cex.ts=0.7, label.offset=0.5, x.lim=c(-40,tree$root.time)+7, width=1, quat.rm=TRUE)
 
+#############################
 # add posterior probs to edges
-edgelabels(round(posteriors, 2), frame="n", cex=0.3, adj=c(0,-0.6))
+#edgelabelstPP$edges(round(posteriors, 2), frame="n", cex=0.3, adj=c(0,-0.6))
+lastPP = get("last_plot.phylo", envir = .PlotPhyloEnv)
+internal_nodes = (lastPP$Ntip + 1):length(lastPP$xx)
+XX = lastPP$xx[internal_nodes]
+YY = lastPP$yy[internal_nodes]
+        
+for (i in 1:length(posteriors)) {
 
+    if (posteriors[i] > 0.80) {
+        if (i == length(posteriors))
+            text(x=XX[i], y=YY[i], round(posteriors[i], 2), cex=0.3, offset=0)
+#           text(x=XX[i], y=YY[i], i, cex=0.3, adj=c(0,-0.6))
+                
+        else {
+#           x = (lastPP$xx[lastPP$edge[, 1][i]] + lastPP$xx[lastPP$edge[, 2][i]])/2
+#           y = lastPP$yy[lastPP$edge[, 2][i]]
+#           text(x=x, y=y, round(posteriors[i], 2), cex=0.3, adj=c(0,-0.6))
+
+            text(x=(XX[i+1] - 0.9), y=(YY[i+1] + 0.8), round(posteriors[i], 2), cex=0.3, offset=0)
+        }
+    }
+}
+
+
+##############################
 # add node bars
 node_bar_col = rgb(red=0,green=0,blue=255,alpha=100,max=255)
 bar_width = 4
@@ -82,26 +108,71 @@ for(i in 1:length(hpd_min)) {
 }
 
 
+############################
+# subfamily labels
+text(27, 30, "Linoideae", offset=0, pos=4, cex=0.7)
+text(23.8, 16, "Hugonioideae", offset=0, pos=4, cex=0.7)
+
+# fossil labels
+draw.circle(0,12.73,radius=1,nv=100,border=NA,col=rgb(red=0,green=100,blue=25,alpha=100,max=255),lty=3,lwd=1)
+draw.circle(40.4,47.8,radius=1,nv=100,border=NA,col=rgb(red=0,green=100,blue=25,alpha=100,max=255),lty=3,lwd=1)
+
+############################
 # add clade bars
 
 bar_text_size = 0.6
 line_x = 97.5
 
-segments(line_x, 96, line_x, 100, lwd=2)
-text(line_x + 1, 97.5, "Ixonanthaceae", offset=0, pos=4, cex=bar_text_size)
+segments(line_x, 1, line_x, 5, lwd=2)
+text(line_x + 1, 2.5, "Ixonanthaceae", offset=0, pos=4, cex=bar_text_size)
 
-segments(line_x, 76, line_x, 95, lwd=2)
-text(line_x + 1, 86, "Hugonioideae", offset=0, pos=4, cex=bar_text_size)
+segments(line_x, 5.7, line_x, 7.2, lwd=2)
+text(line_x + 1, 6, substitute(italic("Hebepetalum")), offset=0, pos=4, cex=bar_text_size)
 
-segments(line_x, 70, line_x, 75, lwd=2)
-text(line_x + 1, 72, "S. Asian genera", offset=0, pos=4, cex=bar_text_size)
+segments(line_x, 7.9, line_x, 10.1, lwd=2)
+text(line_x + 1, 9, substitute(italic("Roucheria")), offset=0, pos=4, cex=bar_text_size)
 
-segments(line_x, 66, line_x, 69, lwd=2)
-text(line_x + 1, 67.5, "Linum sect. Dasylinum", offset=0, pos=4, cex=bar_text_size)
+segments(line_x, 10.8, line_x, 13.2, lwd=2)
+text(line_x + 1, 12, substitute(italic("Philbornea / Indorouchera")), offset=0, pos=4, cex=bar_text_size)
 
-segments(line_x, 46, line_x, 65, lwd=2)
-text(line_x + 1, 60, "Linum sect. Linum", offset=0, pos=4, cex=bar_text_size)
+segments(line_x, 14, line_x, 25.2, lwd=2)
+text(line_x + 1, 20, substitute(italic("Hugonia")), offset=0, pos=4, cex=bar_text_size)
 
+segments(line_x, 25.9, line_x, 31.1, lwd=2)
+text(line_x + 1, 28, "S. Asian genera", offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 31.8, line_x, 35.2, lwd=2)
+text(line_x + 1, 33, substitute(paste(italic("Linum"), " sect. ", italic("Dasylinum"))), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 35.9, line_x, 53.8, lwd=2)
+text(line_x + 1, 45, substitute(paste(italic("Linum"), " sect. ", italic("Linum"))), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 54.5, line_x, 54.9, lwd=2)
+text(line_x + 1, 54.5, substitute(italic("Radiola")), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 55.6, line_x, 56, lwd=2)
+text(line_x + 1, 55.5, substitute(paste(italic("Linum"), " sect. ", italic("Cathartolinum"))), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 56.7, line_x, 64.3, lwd=2)
+text(line_x + 1, 60, substitute(paste(italic("Linum"), " sect. ", italic("Linopsis"))), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 65, line_x, 69.5, lwd=2)
+text(line_x + 1, 67, substitute(paste(italic("Linum"), " sect. ", italic("Syllinum"))), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 70.2, line_x, 71, lwd=2)
+text(line_x + 1, 70.2, substitute(italic("Sclerolinon")), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 71.7, line_x, 84.3, lwd=2)
+text(line_x + 1, 77, substitute(italic("Hesperolinon")), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 85, line_x, 95, lwd=2)
+text(line_x + 1, 90, substitute(paste(italic("Linum"), " sect. ", italic("Linopsis"))), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 95.7, line_x, 96.5, lwd=2)
+text(line_x + 1, 95.7, substitute(italic("Cliococca")), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 97.2, line_x, 100, lwd=2)
+text(line_x + 1, 98, substitute(paste(italic("Linum"), " sect. ", italic("Linopsis"))), offset=0, pos=4, cex=bar_text_size)
 
 # turn off pdf writer
 dev.off()
