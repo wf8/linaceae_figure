@@ -6,80 +6,103 @@ library(phytools)
 library(OutbreakTools)
 library(strap)
 
-
-# helper function to get coordinates from phylo plot
-get_plot_coords <- function()
-{
-    zz = get(x="last_plot.phylo", envir=.PlotPhyloEnv)
-
-    x = zz$xx
-    y = zz$yy
-
-    xy = as.data.frame(cbind(x,y))
-    return(xy)
-}
-
-
+# read in tree
 nexus = "MAP_ages_fixed.tree"
 tree = read.annotated.nexus(nexus)
 
+# turn on pdf writer
+pdf(paste0(nexus, ".pdf"), height=10.0, width=8.5)
+
 # ladderize the tree
 #tree = ladderize(tree, right=FALSE)
-#tree = ladderize(tree, right=TRUE)
 
-posterior = vector()
-internal_edges = vector()
+# get root height
+tree$root.time = max(nodeHeights(tree))
 
-# get annotations
-for (i in 1:(length(tree$annotations)-1)) {
+#tree = drop.tip(tree, "Hugonia_jenkinsii")
 
-    if (!is.null(tree$annotations[[i]]$posterior)) {
+# get posterior annotations
+posteriors = vector()
+for (i in 1:length(tree$annotations)) {
 
-        posterior[i] = round(tree$annotations[[i]]$posterior, 2)
-        internal_edges = append(internal_edges, i)
+    if (!is.null(tree$annotations[[i]]$posterior)) 
+        posteriors[i] = tree$annotations[[i]]$posterior
+}
 
-    } else { 
-        posterior[i] = 1.0
-    }
+hpd_min = vector()
+hpd_max = vector()
 
+# add values into vectors
+for(i in 1:length(tree$annotations)){
+
+    if (!is.null(tree$annotations[[i]]$`height_95%_HPD`)) {
+
+        min_i = tree$annotations[[i]]$`height_95%_HPD`[[1]]
+        max_i = tree$annotations[[i]]$`height_95%_HPD`[[2]]
+
+        if (min_i < tree$root.time) 
+            min_i = tree$root.time - min_i
+        else
+            min_i = -1 * (min_i - tree$root.time)
+
+        if (max_i < tree$root.time) 
+            max_i = tree$root.time - max_i
+        else
+            max_i = -1 * (max_i - tree$root.time)
+        
+
+        hpd_min = append(hpd_min, min_i)
+        hpd_max = append(hpd_max, max_i)
+
+    } 
 }
 
 
 # plot the tree with geological scale
-tree$root.time = max(nodeHeights(tree))
-geoscalePhylo(tree, units=c("Period", "Epoch"), boxes="Epoch", cex.tip=0.3, cex.age=0.5, cex.ts=0.5, label.offset=0.5, x.lim=c(-10,tree$root.time), lwd=1, width=1, quat.rm=TRUE)
+geoscalePhylo(tree, units=c("Period", "Epoch"), boxes="Epoch", cex.tip=0.5, cex.age=0.5, cex.ts=0.5, label.offset=0.5, x.lim=c(-40,tree$root.time)+7, width=1, quat.rm=TRUE)
 
 # add posterior probs to edges
-#edgelabels(posterior, edge=internal_edges, frame="n", cex=0.3, adj=c(0,-0.7))
+edgelabels(round(posteriors, 2), frame="n", cex=0.3, adj=c(0,-0.6))
 
-# add bars at nodes
+# add node bars
 node_bar_col = rgb(red=0,green=0,blue=255,alpha=100,max=255)
 bar_width = 4
-xy = get_plot_coords()
-x0 = vector()
-x1 = vector()
-for (i in 1:(length(tree$annotations)-1)) {
-    
-    if (!is.null(tree$annotations[[i]]$`height_95%_HPD`)) {
+# get the coordinates of the last tree plot
+lastPP = get("last_plot.phylo", envir = .PlotPhyloEnv)
+internal_nodes = (lastPP$Ntip + 1):length(lastPP$xx)
+XX = lastPP$xx[internal_nodes]
+YY = lastPP$yy[internal_nodes]
 
-        #print("")
-        #print(tree$annotations[[i]]$`height_95%_HPD`[[1]])
-        #print(tree$annotations[[i]]$`height_95%_HPD`[[2]])
-        #print(tree$root.time - tree$annotations[[i]]$`height_95%_HPD`[[1]])
-        #print(tree$root.time - tree$annotations[[i]]$`height_95%_HPD`[[2]])
+for(i in 1:length(hpd_min)) {
 
-        x0 = append(x0, tree$root.time - tree$annotations[[i]]$`height_95%_HPD`[[1]])
-        x1 = append(x1, tree$root.time - tree$annotations[[i]]$`height_95%_HPD`[[2]])
-    } 
-
+    if (i == length(hpd_min))
+        segments(x0=hpd_min[i], x1=hpd_max[i], y0=YY[1], y1=YY[1], col=node_bar_col, lwd=bar_width)
+    else
+        segments(x0=hpd_min[i], x1=hpd_max[i], y0=YY[i+1], y1=YY[i+1], col=node_bar_col, lwd=bar_width)
 }
-#max_x0 = max(x0)
-#max_x1 = max(x1)
-#x0 = max_x0 + tree$root.time - x0
-#x1 = max_x1 + tree$root.time - x1
-segments(x0=x0, x1=x1, y0=xy$y, y1=xy$y, col=node_bar_col, lwd=bar_width)
 
-# make pdf
-#pdf(nexus + ".pdf", height=11.0, width=8.5)
 
+# add clade bars
+
+bar_text_size = 0.6
+line_x = 97.5
+
+segments(line_x, 96, line_x, 100, lwd=2)
+text(line_x + 1, 97.5, "Ixonanthaceae", offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 76, line_x, 95, lwd=2)
+text(line_x + 1, 86, "Hugonioideae", offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 70, line_x, 75, lwd=2)
+text(line_x + 1, 72, "S. Asian genera", offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 66, line_x, 69, lwd=2)
+text(line_x + 1, 67.5, "Linum sect. Dasylinum", offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 46, line_x, 65, lwd=2)
+text(line_x + 1, 60, "Linum sect. Linum", offset=0, pos=4, cex=bar_text_size)
+
+
+# turn off pdf writer
+dev.off()
 
