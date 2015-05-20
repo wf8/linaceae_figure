@@ -8,7 +8,7 @@ library(strap)
 library(plotrix)
 
 # read in tree
-nexus = "MAP_ages_fixed.tree"
+nexus = "MAP_ages_fixed_abr.tree"
 tree = read.annotated.nexus(nexus)
 
 # turn on pdf writer
@@ -109,6 +109,10 @@ for(i in 1:length(hpd_min)) {
 
 
 ############################
+# family labels
+text(1, 3.5, "Ixonanthaceae", offset=0, pos=4, cex=0.8)
+text(1, 24.5, "Linaceae", offset=0, pos=4, cex=0.8)
+
 # subfamily labels
 text(27, 30, "Linoideae", offset=0, pos=4, cex=0.7)
 text(23.8, 16, "Hugonioideae", offset=0, pos=4, cex=0.7)
@@ -121,25 +125,36 @@ draw.circle(40.4,47.8,radius=1,nv=100,border=NA,col=rgb(red=0,green=100,blue=25,
 # add clade bars
 
 bar_text_size = 0.6
-line_x = 97.5
+line_x = 92.2
 
 segments(line_x, 1, line_x, 5, lwd=2)
-text(line_x + 1, 2.5, "Ixonanthaceae", offset=0, pos=4, cex=bar_text_size)
+text(line_x + 1, 2, substitute(italic("Ochthocosmus")), offset=0, pos=4, cex=bar_text_size)
+text(line_x + 1, 3.5, substitute(italic("Cyrillopsis / Ixonanthes")), offset=0, pos=4, cex=bar_text_size)
 
 segments(line_x, 5.7, line_x, 7.2, lwd=2)
-text(line_x + 1, 6, substitute(italic("Hebepetalum")), offset=0, pos=4, cex=bar_text_size)
+text(line_x + 1, 6.2, substitute(italic("Hebepetalum")), offset=0, pos=4, cex=bar_text_size)
 
-segments(line_x, 7.9, line_x, 10.1, lwd=2)
-text(line_x + 1, 9, substitute(italic("Roucheria")), offset=0, pos=4, cex=bar_text_size)
+segments(line_x, 7.9, line_x, 10, lwd=2)
+text(line_x + 1, 8.7, substitute(italic("Roucheria")), offset=0, pos=4, cex=bar_text_size)
 
-segments(line_x, 10.8, line_x, 13.2, lwd=2)
-text(line_x + 1, 12, substitute(italic("Philbornea / Indorouchera")), offset=0, pos=4, cex=bar_text_size)
+segments(line_x, 10.6, line_x, 11.2, lwd=2)
+text(line_x + 1, 10.6, substitute(paste(italic("Hugonia"), " sect. ", italic("Durandea"))), offset=0, pos=4, cex=bar_text_size)
 
-segments(line_x, 14, line_x, 25.2, lwd=2)
-text(line_x + 1, 20, substitute(italic("Hugonia")), offset=0, pos=4, cex=bar_text_size)
+segments(line_x, 11.8, line_x, 13.2, lwd=2)
+text(line_x + 1, 12.5, substitute(italic("Philbornea / Indorouchera")), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 13.9, line_x, 16.3, lwd=2)
+text(line_x + 1, 14.8, substitute(paste(italic("Hugonia"), " sect. ", italic("Durandea"))), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 16.9, line_x, 17.5, lwd=2)
+text(line_x + 1, 16.9, substitute(paste(italic("Hugonia"), " sect. ", italic("Hugoniopsis"))), offset=0, pos=4, cex=bar_text_size)
+
+segments(line_x, 18.2, line_x, 25.2, lwd=2)
+text(line_x + 1, 21, substitute(paste(italic("Hugonia"), " sect. ", italic("Hugonia"))), offset=0, pos=4, cex=bar_text_size)
 
 segments(line_x, 25.9, line_x, 31.1, lwd=2)
-text(line_x + 1, 28, "S. Asian genera", offset=0, pos=4, cex=bar_text_size)
+text(line_x + 1, 29, substitute(italic("Anisadenia / Tirpitzia")), offset=0, pos=4, cex=bar_text_size)
+text(line_x + 1, 27.5, substitute(italic("Reinwardtia")), offset=0, pos=4, cex=bar_text_size)
 
 segments(line_x, 31.8, line_x, 35.2, lwd=2)
 text(line_x + 1, 33, substitute(paste(italic("Linum"), " sect. ", italic("Dasylinum"))), offset=0, pos=4, cex=bar_text_size)
@@ -151,7 +166,7 @@ segments(line_x, 54.5, line_x, 54.9, lwd=2)
 text(line_x + 1, 54.5, substitute(italic("Radiola")), offset=0, pos=4, cex=bar_text_size)
 
 segments(line_x, 55.6, line_x, 56, lwd=2)
-text(line_x + 1, 55.5, substitute(paste(italic("Linum"), " sect. ", italic("Cathartolinum"))), offset=0, pos=4, cex=bar_text_size)
+text(line_x + 1, 55.7, substitute(paste(italic("Linum"), " sect. ", italic("Cathartolinum"))), offset=0, pos=4, cex=bar_text_size)
 
 segments(line_x, 56.7, line_x, 64.3, lwd=2)
 text(line_x + 1, 60, substitute(paste(italic("Linum"), " sect. ", italic("Linopsis"))), offset=0, pos=4, cex=bar_text_size)
@@ -169,7 +184,7 @@ segments(line_x, 85, line_x, 95, lwd=2)
 text(line_x + 1, 90, substitute(paste(italic("Linum"), " sect. ", italic("Linopsis"))), offset=0, pos=4, cex=bar_text_size)
 
 segments(line_x, 95.7, line_x, 96.5, lwd=2)
-text(line_x + 1, 95.7, substitute(italic("Cliococca")), offset=0, pos=4, cex=bar_text_size)
+text(line_x + 1, 95.9, substitute(italic("Cliococca")), offset=0, pos=4, cex=bar_text_size)
 
 segments(line_x, 97.2, line_x, 100, lwd=2)
 text(line_x + 1, 98, substitute(paste(italic("Linum"), " sect. ", italic("Linopsis"))), offset=0, pos=4, cex=bar_text_size)
